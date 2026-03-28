@@ -213,7 +213,7 @@ app.get("*", (req, res) =>
 ### Environment for production
 ```env
 NODE_ENV=production
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/studymind
+MONGODB_URI=your-mongodb-uri-goes-here
 JWT_SECRET=<long-random-string-from-openssl-rand>
 FRONTEND_URL=https://yourdomain.com
 ```
