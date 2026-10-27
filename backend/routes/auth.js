@@ -14,17 +14,20 @@ function signToken(id) {
 // POST /api/auth/register
 router.post("/register", async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
+    const { name, email, password } = req.body || {};
+    if (typeof name !== "string" || !name.trim() ||
+        typeof email !== "string" || !email.trim() ||
+        typeof password !== "string" || !password) {
       return res.status(400).json({ error: "Name, email and password are required." });
     }
     if (password.length < 6) {
       return res.status(400).json({ error: "Password must be at least 6 characters." });
     }
-    const existing = await User.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = email.trim().toLowerCase();
+    const existing = await User.findOne({ email: normalizedEmail });
     if (existing) return res.status(409).json({ error: "Email already in use." });
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name: name.trim(), email: normalizedEmail, password });
     const token = signToken(user._id);
     res.status(201).json({ token, user });
   } catch (err) {
@@ -35,11 +38,12 @@ router.post("/register", async (req, res, next) => {
 // POST /api/auth/login
 router.post("/login", async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { email, password } = req.body || {};
+    if (typeof email !== "string" || !email.trim() ||
+        typeof password !== "string" || !password) {
       return res.status(400).json({ error: "Email and password are required." });
     }
-    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    const user = await User.findOne({ email: email.trim().toLowerCase() }).select("+password");
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
